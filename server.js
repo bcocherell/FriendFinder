@@ -5,7 +5,7 @@ var path = require('path');
 var app = express(); 
 var PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.urlencoded({ extended: true})); // using 'extended: true' due to issues with json formatting during post
 app.use(bodyParser.json());
 
 var htmlRoutes = require('./app/routing/htmlRoutes')(app);

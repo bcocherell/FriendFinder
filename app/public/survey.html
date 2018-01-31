@@ -61,6 +61,7 @@
 
   <script type="text/javascript">
     
+    // setting up questions and answers
     var questions = [
       'There are too many gun control laws and regulations.', 
       'Human life begins at conception.', 
@@ -76,6 +77,8 @@
     var options = ['', '1 (Strongly Agree)', '2', '3', '4', '5 (Strongly Disagree)'];
 
     function displayQuestions() {
+
+      // looping through questions array and displaying on site
 
       $('#questions').empty();
 
@@ -106,7 +109,7 @@
     
     $("#submit").on("click", function(event) {
 
-      // Form validation
+      // form validation, all values need to be filled out
     	function validateForm() {
         var isValid = true;
         $('.form-control').each(function() {
@@ -119,6 +122,7 @@
 
       if (validateForm() === true) {
         
+        // assembling array to pass to POST route
         var scores = [];
         for (var i = 1; i <= questions.length; i++ ){
           scores.push(parseInt($('#q' + i).val()));
@@ -129,21 +133,18 @@
           photo: $("#photo").val().trim(),
           scores: scores
         };
-
-        console.log(newFriend);
-
         
-        // Question: What does this code do??
         $.post("/api/friends", newFriend)
         .done(function(data) {
           
-          // Grab the result from the AJAX post so that the best match's name and photo are displayed.
+          // setting things up for modal display
           $("#matchName").text(data.name);
           $("#matchPhoto").attr("src", data.photo);
 
           // Show the modal with the best match
           $("#basicModal").modal("toggle");
 
+          // resetting form fields
           $(".form-control").val('');
         });
       }
