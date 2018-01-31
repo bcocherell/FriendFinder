@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FriendFinder</title>
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+  <script src="https://use.fontawesome.com/638d4cc7ae.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Survey Questions</h2>
+    <hr>
+    <h3>About You</h3>
+    
+    <div class="form-group">
+      <label for="name">Name (required)</label>
+      <input type="text" class="form-control" id="name">
+    </div>
+    <div class="form-group">
+      <label for="photo">Link to Photo Image (required)</label>
+      <input type="text" class="form-control" id="photo">
+    </div>
+    
+    <hr>
+    <h3>Questions</h3>
+    <h4>Please select whether you agree or disagree to the following statements:</h4>
+    <div id="questions"></div>
+
+    <button type="submit" class="btn btn-primary btn-lg" id="submit"><span class="glyphicon glyphicon-ok-sign"></span> Submit</button>
+    <hr>  
+
+    <footer class="footer">
+      <div class="container">
+        <a href="/api/friends">API Friends List</a> | <a href="https://github.com/bcocherell/FriendFinder">GitHub Repo</a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Best Match</h4>
+        </div>
+        <div class="modal-body">
+          <h2 id="matchName"></h2>
+          <img id="matchPhoto" class="img-responsive"> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    
+    var questions = [
+      'There are too many gun control laws and regulations.', 
+      'Human life begins at conception.', 
+      'Oil, gas and coal are all good sources of energy.',
+      '"Global Warming" is fake news.',
+      'We should build more walls.', 
+      'Health care should remain privatized.', 
+      'Marriage is the union of one man and one woman.', 
+      'Lower taxes and a smaller government with limited power will improve the standard of living for all.', 
+      'Terrorism poses one of the greatest threats to the U.S.', 
+      'School vouchers create competition and therefore encourage schools to improve performance.'
+    ];
+    var options = ['', '1 (Strongly Agree)', '2', '3', '4', '5 (Strongly Disagree)'];
+
+    function displayQuestions() {
+
+      $('#questions').empty();
+
+      for (var i = 1; i <= questions.length; i++){
+        var div = $('<div class="form-group">');
+        var label = $('<label for="q' + i + '">');
+        label.text(questions[i - 1]);  
+        var select = $('<select class="form-control" id="q' + i + '">');
+
+        for (var j = 0; j < options.length; j++) {
+          if (j === 0) {
+            var option = $('<option value="">');
+          }
+          else {
+            var option = $('<option value="' + j + '">');
+          }
+          option.text(options[j]);
+          select.append(option);
+        }
+        
+        div.append(label);
+        div.append(select);
+        $('#questions').append(div);
+      }
+    }
+
+    displayQuestions();
+    
+    $("#submit").on("click", function(event) {
+
+      // Form validation
+    	function validateForm() {
+        var isValid = true;
+        $('.form-control').each(function() {
+          if ( $(this).val() === '' )
+              isValid = false;
+        });
+
+        return isValid;
+      }
+
+      if (validateForm() === true) {
+        
+        var scores = [];
+        for (var i = 1; i <= questions.length; i++ ){
+          scores.push(parseInt($('#q' + i).val()));
+        }
+
+        var newFriend = {
+          name: $("#name").val().trim(),
+          photo: $("#photo").val().trim(),
+          scores: scores
+        };
+
+        console.log(newFriend);
+
+        
+        // Question: What does this code do??
+        $.post("/api/friends", newFriend)
+        .done(function(data) {
+          
+          // Grab the result from the AJAX post so that the best match's name and photo are displayed.
+          $("#matchName").text(data.name);
+          $("#matchPhoto").attr("src", data.photo);
+
+          // Show the modal with the best match
+          $("#basicModal").modal("toggle");
+
+          $(".form-control").val('');
+        });
+      }
+      else {
+        alert('Please fill out all survey fields');
+      }
+      
+      return false;
+    });
+  </script>
+
+</body>
+</html>
